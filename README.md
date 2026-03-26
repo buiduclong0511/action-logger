@@ -32,6 +32,10 @@ Chrome Extension ghi lại toàn bộ thao tác người dùng (click, input, sc
 
 6. Extension sẽ xuất hiện trên thanh toolbar của Chrome. Nhấn vào icon **Action Logger** để sử dụng.
 
+## Demo
+
+<video src="videos/REC-20260326201348.mp4" controls width="100%"></video>
+
 ## Sử dụng
 
 1. Nhấn **Start** để bắt đầu ghi lại các thao tác
