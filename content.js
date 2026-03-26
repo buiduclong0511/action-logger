@@ -225,12 +225,48 @@
         });
       }
 
-      // ── Theo dõi input/textarea mới được thêm vào DOM
+      // ── Theo dõi thêm/xóa element khỏi DOM
       if (mutation.type === 'childList') {
+        const causedBy = getCausedBy();
+
         mutation.addedNodes.forEach(node => {
           if (node.nodeType !== 1) return; // chỉ elements
+
+          // Snapshot input mới
           node.querySelectorAll?.('input, textarea, select').forEach(el => {
             observedValues.set(el, getValue(el));
+          });
+
+          // Log element được thêm vào DOM
+          const text = node.textContent?.trim().slice(0, 120) || '';
+          if (!text) return; // bỏ qua node rỗng
+
+          sendAction({
+            type: 'dom_mutation',
+            trigger: causedBy ? 'auto' : 'unknown',
+            mutationKind: 'childList:added',
+            selector: getSelector(node),
+            parentSelector: getSelector(mutation.target),
+            tagName: node.tagName?.toLowerCase(),
+            text,
+            ...(causedBy && { causedBy }),
+          });
+        });
+
+        mutation.removedNodes.forEach(node => {
+          if (node.nodeType !== 1) return;
+
+          const text = node.textContent?.trim().slice(0, 120) || '';
+          if (!text) return;
+
+          sendAction({
+            type: 'dom_mutation',
+            trigger: causedBy ? 'auto' : 'unknown',
+            mutationKind: 'childList:removed',
+            parentSelector: getSelector(mutation.target),
+            tagName: node.tagName?.toLowerCase(),
+            text,
+            ...(causedBy && { causedBy }),
           });
         });
       }
