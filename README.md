@@ -19,7 +19,7 @@ Chrome Extension ghi lại toàn bộ thao tác người dùng (click, input, sc
 1. Clone hoặc tải source code về máy:
 
    ```bash
-   git clone git@github.com:buiduclong0511/action-logger.git
+   git clone https://github.com/buiduclong0511/action-logger.git
    ```
 
 2. Mở Chrome, truy cập `chrome://extensions/`
