@@ -228,7 +228,7 @@ btnCopy.addEventListener('click', () => {
     });
   }
 
-  navigator.clipboard.writeText(JSON.stringify(filtered, null, 2)).then(() => {
+  navigator.clipboard.writeText(JSON.stringify(filtered)).then(() => {
     copiedToast.classList.add('show');
     setTimeout(() => copiedToast.classList.remove('show'), 2000);
   });
