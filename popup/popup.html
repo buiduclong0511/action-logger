@@ -8,6 +8,146 @@
     @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600&display=swap');
 
     :root {
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Inter', sans-serif;
+    }
+
+    /* ── Light theme (default) ── */
+    :root {
+      --bg: #f8f9fb;
+      --surface: #ffffff;
+      --surface2: #f1f3f5;
+      --border: #e2e5ea;
+      --accent: #16a34a;
+      --accent-dim: rgba(22, 163, 74, 0.1);
+      --danger: #dc2626;
+      --danger-dim: rgba(220, 38, 38, 0.1);
+      --warning: #d97706;
+      --muted: #9ca3af;
+      --text: #1e293b;
+      --text-dim: #64748b;
+      --user-color: #2563eb;
+      --auto-color: #7c3aed;
+      --system-color: #64748b;
+
+      --badge-click-bg: rgba(37, 99, 235, 0.1);
+      --badge-click-fg: #2563eb;
+      --badge-input-bg: rgba(22, 163, 74, 0.1);
+      --badge-input-fg: #16a34a;
+      --badge-keydown-bg: rgba(217, 119, 6, 0.1);
+      --badge-keydown-fg: #d97706;
+      --badge-scroll-bg: rgba(100, 116, 139, 0.08);
+      --badge-scroll-fg: #64748b;
+      --badge-dom-bg: rgba(124, 58, 237, 0.1);
+      --badge-dom-fg: #7c3aed;
+      --badge-navigate-bg: rgba(234, 88, 12, 0.1);
+      --badge-navigate-fg: #ea580c;
+      --badge-console-bg: rgba(219, 39, 119, 0.1);
+      --badge-console-fg: #db2777;
+      --badge-recording-bg: rgba(22, 163, 74, 0.08);
+      --badge-recording-fg: #16a34a;
+
+      --method-log-bg: rgba(100, 116, 139, 0.1);
+      --method-log-fg: #64748b;
+      --method-warn-bg: rgba(217, 119, 6, 0.1);
+      --method-warn-fg: #d97706;
+      --method-error-bg: rgba(220, 38, 38, 0.1);
+      --method-error-fg: #dc2626;
+      --method-info-bg: rgba(37, 99, 235, 0.1);
+      --method-info-fg: #2563eb;
+      --method-debug-bg: rgba(124, 58, 237, 0.1);
+      --method-debug-fg: #7c3aed;
+
+      --trigger-user-bg: rgba(37, 99, 235, 0.08);
+      --trigger-auto-bg: rgba(124, 58, 237, 0.08);
+      --trigger-system-bg: rgba(100, 116, 139, 0.08);
+      --trigger-unknown-bg: rgba(217, 119, 6, 0.08);
+
+      --chip-user-bg: rgba(37, 99, 235, 0.08);
+      --chip-auto-bg: rgba(124, 58, 237, 0.08);
+
+      --json-key: #2563eb;
+      --json-string: #16a34a;
+      --json-number: #dc2626;
+      --json-bool: #d97706;
+
+      --btn-record-hover: rgba(22, 163, 74, 0.2);
+      --btn-stop-hover: rgba(220, 38, 38, 0.2);
+      --btn-copy-border: rgba(217, 119, 6, 0.3);
+      --btn-copy-bg: rgba(217, 119, 6, 0.06);
+      --btn-copy-hover: rgba(217, 119, 6, 0.12);
+    }
+
+    /* ── Dark theme: system preference OR manual override ── */
+    @media (prefers-color-scheme: dark) {
+      :root:not([data-theme="light"]) {
+        --bg: #0d0f14;
+        --surface: #161922;
+        --surface2: #1e2330;
+        --border: #2a3040;
+        --accent: #4ade80;
+        --accent-dim: rgba(74, 222, 128, 0.15);
+        --danger: #f87171;
+        --danger-dim: rgba(248, 113, 113, 0.15);
+        --warning: #fbbf24;
+        --muted: #4a5568;
+        --text: #e2e8f0;
+        --text-dim: #64748b;
+        --user-color: #60a5fa;
+        --auto-color: #a78bfa;
+        --system-color: #94a3b8;
+
+        --badge-click-bg: rgba(96, 165, 250, 0.15);
+        --badge-click-fg: #60a5fa;
+        --badge-input-bg: rgba(74, 222, 128, 0.15);
+        --badge-input-fg: #4ade80;
+        --badge-keydown-bg: rgba(251, 191, 36, 0.15);
+        --badge-keydown-fg: #fbbf24;
+        --badge-scroll-bg: rgba(148, 163, 184, 0.1);
+        --badge-scroll-fg: #94a3b8;
+        --badge-dom-bg: rgba(167, 139, 250, 0.15);
+        --badge-dom-fg: #a78bfa;
+        --badge-navigate-bg: rgba(251, 146, 60, 0.15);
+        --badge-navigate-fg: #fb923c;
+        --badge-console-bg: rgba(244, 114, 182, 0.15);
+        --badge-console-fg: #f472b6;
+        --badge-recording-bg: rgba(74, 222, 128, 0.1);
+        --badge-recording-fg: #4ade80;
+
+        --method-log-bg: rgba(148, 163, 184, 0.15);
+        --method-log-fg: #94a3b8;
+        --method-warn-bg: rgba(251, 191, 36, 0.15);
+        --method-warn-fg: #fbbf24;
+        --method-error-bg: rgba(248, 113, 113, 0.15);
+        --method-error-fg: #f87171;
+        --method-info-bg: rgba(96, 165, 250, 0.15);
+        --method-info-fg: #60a5fa;
+        --method-debug-bg: rgba(167, 139, 250, 0.15);
+        --method-debug-fg: #a78bfa;
+
+        --trigger-user-bg: rgba(96, 165, 250, 0.1);
+        --trigger-auto-bg: rgba(167, 139, 250, 0.1);
+        --trigger-system-bg: rgba(148, 163, 184, 0.1);
+        --trigger-unknown-bg: rgba(251, 191, 36, 0.1);
+
+        --chip-user-bg: rgba(96, 165, 250, 0.1);
+        --chip-auto-bg: rgba(167, 139, 250, 0.1);
+
+        --json-key: #93c5fd;
+        --json-string: #86efac;
+        --json-number: #fca5a5;
+        --json-bool: #fbbf24;
+
+        --btn-record-hover: rgba(74, 222, 128, 0.25);
+        --btn-stop-hover: rgba(248, 113, 113, 0.25);
+        --btn-copy-border: rgba(251, 191, 36, 0.3);
+        --btn-copy-bg: rgba(251, 191, 36, 0.08);
+        --btn-copy-hover: rgba(251, 191, 36, 0.15);
+      }
+    }
+
+    /* ── Manual dark override ── */
+    :root[data-theme="dark"] {
       --bg: #0d0f14;
       --surface: #161922;
       --surface2: #1e2330;
@@ -23,8 +163,127 @@
       --user-color: #60a5fa;
       --auto-color: #a78bfa;
       --system-color: #94a3b8;
-      --mono: 'JetBrains Mono', monospace;
-      --sans: 'Inter', sans-serif;
+
+      --badge-click-bg: rgba(96, 165, 250, 0.15);
+      --badge-click-fg: #60a5fa;
+      --badge-input-bg: rgba(74, 222, 128, 0.15);
+      --badge-input-fg: #4ade80;
+      --badge-keydown-bg: rgba(251, 191, 36, 0.15);
+      --badge-keydown-fg: #fbbf24;
+      --badge-scroll-bg: rgba(148, 163, 184, 0.1);
+      --badge-scroll-fg: #94a3b8;
+      --badge-dom-bg: rgba(167, 139, 250, 0.15);
+      --badge-dom-fg: #a78bfa;
+      --badge-navigate-bg: rgba(251, 146, 60, 0.15);
+      --badge-navigate-fg: #fb923c;
+      --badge-console-bg: rgba(244, 114, 182, 0.15);
+      --badge-console-fg: #f472b6;
+      --badge-recording-bg: rgba(74, 222, 128, 0.1);
+      --badge-recording-fg: #4ade80;
+
+      --method-log-bg: rgba(148, 163, 184, 0.15);
+      --method-log-fg: #94a3b8;
+      --method-warn-bg: rgba(251, 191, 36, 0.15);
+      --method-warn-fg: #fbbf24;
+      --method-error-bg: rgba(248, 113, 113, 0.15);
+      --method-error-fg: #f87171;
+      --method-info-bg: rgba(96, 165, 250, 0.15);
+      --method-info-fg: #60a5fa;
+      --method-debug-bg: rgba(167, 139, 250, 0.15);
+      --method-debug-fg: #a78bfa;
+
+      --trigger-user-bg: rgba(96, 165, 250, 0.1);
+      --trigger-auto-bg: rgba(167, 139, 250, 0.1);
+      --trigger-system-bg: rgba(148, 163, 184, 0.1);
+      --trigger-unknown-bg: rgba(251, 191, 36, 0.1);
+
+      --chip-user-bg: rgba(96, 165, 250, 0.1);
+      --chip-auto-bg: rgba(167, 139, 250, 0.1);
+
+      --json-key: #93c5fd;
+      --json-string: #86efac;
+      --json-number: #fca5a5;
+      --json-bool: #fbbf24;
+
+      --btn-record-hover: rgba(74, 222, 128, 0.25);
+      --btn-stop-hover: rgba(248, 113, 113, 0.25);
+      --btn-copy-border: rgba(251, 191, 36, 0.3);
+      --btn-copy-bg: rgba(251, 191, 36, 0.08);
+      --btn-copy-hover: rgba(251, 191, 36, 0.15);
+    }
+
+    /* ── Manual light override ── */
+    :root[data-theme="light"] {
+      --bg: #f8f9fb;
+      --surface: #ffffff;
+      --surface2: #f1f3f5;
+      --border: #e2e5ea;
+      --accent: #16a34a;
+      --accent-dim: rgba(22, 163, 74, 0.1);
+      --danger: #dc2626;
+      --danger-dim: rgba(220, 38, 38, 0.1);
+      --warning: #d97706;
+      --muted: #9ca3af;
+      --text: #1e293b;
+      --text-dim: #64748b;
+      --user-color: #2563eb;
+      --auto-color: #7c3aed;
+      --system-color: #64748b;
+
+      --badge-click-bg: rgba(37, 99, 235, 0.1);
+      --badge-click-fg: #2563eb;
+      --badge-input-bg: rgba(22, 163, 74, 0.1);
+      --badge-input-fg: #16a34a;
+      --badge-keydown-bg: rgba(217, 119, 6, 0.1);
+      --badge-keydown-fg: #d97706;
+      --badge-scroll-bg: rgba(100, 116, 139, 0.08);
+      --badge-scroll-fg: #64748b;
+      --badge-dom-bg: rgba(124, 58, 237, 0.1);
+      --badge-dom-fg: #7c3aed;
+      --badge-navigate-bg: rgba(234, 88, 12, 0.1);
+      --badge-navigate-fg: #ea580c;
+      --badge-console-bg: rgba(219, 39, 119, 0.1);
+      --badge-console-fg: #db2777;
+      --badge-recording-bg: rgba(22, 163, 74, 0.08);
+      --badge-recording-fg: #16a34a;
+
+      --method-log-bg: rgba(100, 116, 139, 0.1);
+      --method-log-fg: #64748b;
+      --method-warn-bg: rgba(217, 119, 6, 0.1);
+      --method-warn-fg: #d97706;
+      --method-error-bg: rgba(220, 38, 38, 0.1);
+      --method-error-fg: #dc2626;
+      --method-info-bg: rgba(37, 99, 235, 0.1);
+      --method-info-fg: #2563eb;
+      --method-debug-bg: rgba(124, 58, 237, 0.1);
+      --method-debug-fg: #7c3aed;
+
+      --trigger-user-bg: rgba(37, 99, 235, 0.08);
+      --trigger-auto-bg: rgba(124, 58, 237, 0.08);
+      --trigger-system-bg: rgba(100, 116, 139, 0.08);
+      --trigger-unknown-bg: rgba(217, 119, 6, 0.08);
+
+      --chip-user-bg: rgba(37, 99, 235, 0.08);
+      --chip-auto-bg: rgba(124, 58, 237, 0.08);
+
+      --json-key: #2563eb;
+      --json-string: #16a34a;
+      --json-number: #dc2626;
+      --json-bool: #d97706;
+
+      --btn-record-hover: rgba(22, 163, 74, 0.2);
+      --btn-stop-hover: rgba(220, 38, 38, 0.2);
+      --btn-copy-border: rgba(217, 119, 6, 0.3);
+      --btn-copy-bg: rgba(217, 119, 6, 0.06);
+      --btn-copy-hover: rgba(217, 119, 6, 0.12);
+    }
+
+    /* ── Theme toggle button ── */
+    .btn-theme {
+      color: var(--text-dim);
+      font-size: 14px;
+      padding: 5px 8px;
+      line-height: 1;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -107,14 +366,14 @@
       background: var(--accent-dim);
       color: var(--accent);
     }
-    .btn-record:hover { background: rgba(74,222,128,0.25); }
+    .btn-record:hover { background: var(--btn-record-hover); }
 
     .btn-stop {
       border-color: var(--danger);
       background: var(--danger-dim);
       color: var(--danger);
     }
-    .btn-stop:hover { background: rgba(248,113,113,0.25); }
+    .btn-stop:hover { background: var(--btn-stop-hover); }
 
     .btn-clear {
       color: var(--text-dim);
@@ -122,10 +381,10 @@
 
     .btn-copy {
       color: var(--warning);
-      border-color: rgba(251,191,36,0.3);
-      background: rgba(251,191,36,0.08);
+      border-color: var(--btn-copy-border);
+      background: var(--btn-copy-bg);
     }
-    .btn-copy:hover { background: rgba(251,191,36,0.15); }
+    .btn-copy:hover { background: var(--btn-copy-hover); }
 
     /* ── Stats bar ── */
     .stats-bar {
@@ -179,8 +438,8 @@
       color: var(--text);
       border-color: var(--border);
     }
-    .filter-chip.chip-user.active { color: var(--user-color); border-color: var(--user-color); background: rgba(96,165,250,0.1); }
-    .filter-chip.chip-auto.active { color: var(--auto-color); border-color: var(--auto-color); background: rgba(167,139,250,0.1); }
+    .filter-chip.chip-user.active { color: var(--user-color); border-color: var(--user-color); background: var(--chip-user-bg); }
+    .filter-chip.chip-auto.active { color: var(--auto-color); border-color: var(--auto-color); background: var(--chip-auto-bg); }
 
     /* ── Actions list ── */
     .actions-container {
@@ -235,14 +494,14 @@
       flex-shrink: 0;
     }
 
-    .badge-click    { background: rgba(96,165,250,0.15);  color: #60a5fa; }
-    .badge-input    { background: rgba(74,222,128,0.15);  color: #4ade80; }
-    .badge-keydown  { background: rgba(251,191,36,0.15);  color: #fbbf24; }
-    .badge-scroll   { background: rgba(148,163,184,0.1);  color: #94a3b8; }
-    .badge-dom_mutation { background: rgba(167,139,250,0.15); color: #a78bfa; }
-    .badge-navigate { background: rgba(251,146,60,0.15);  color: #fb923c; }
-    .badge-console  { background: rgba(244,114,182,0.15); color: #f472b6; }
-    .badge-recording_started { background: rgba(74,222,128,0.1); color: #4ade80; }
+    .badge-click    { background: var(--badge-click-bg);  color: var(--badge-click-fg); }
+    .badge-input    { background: var(--badge-input-bg);  color: var(--badge-input-fg); }
+    .badge-keydown  { background: var(--badge-keydown-bg);  color: var(--badge-keydown-fg); }
+    .badge-scroll   { background: var(--badge-scroll-bg);  color: var(--badge-scroll-fg); }
+    .badge-dom_mutation { background: var(--badge-dom-bg); color: var(--badge-dom-fg); }
+    .badge-navigate { background: var(--badge-navigate-bg);  color: var(--badge-navigate-fg); }
+    .badge-console  { background: var(--badge-console-bg); color: var(--badge-console-fg); }
+    .badge-recording_started { background: var(--badge-recording-bg); color: var(--badge-recording-fg); }
 
     /* Console method sub-badges */
     .console-method {
@@ -252,11 +511,11 @@
       font-family: var(--mono);
       font-weight: 600;
     }
-    .method-log   { background: rgba(148,163,184,0.15); color: #94a3b8; }
-    .method-warn  { background: rgba(251,191,36,0.15);  color: #fbbf24; }
-    .method-error { background: rgba(248,113,113,0.15); color: #f87171; }
-    .method-info  { background: rgba(96,165,250,0.15);  color: #60a5fa; }
-    .method-debug { background: rgba(167,139,250,0.15); color: #a78bfa; }
+    .method-log   { background: var(--method-log-bg); color: var(--method-log-fg); }
+    .method-warn  { background: var(--method-warn-bg);  color: var(--method-warn-fg); }
+    .method-error { background: var(--method-error-bg); color: var(--method-error-fg); }
+    .method-info  { background: var(--method-info-bg);  color: var(--method-info-fg); }
+    .method-debug { background: var(--method-debug-bg); color: var(--method-debug-fg); }
 
     .trigger-badge {
       font-size: 10px;
@@ -264,10 +523,10 @@
       border-radius: 3px;
       flex-shrink: 0;
     }
-    .trigger-user    { background: rgba(96,165,250,0.1);  color: var(--user-color); }
-    .trigger-auto    { background: rgba(167,139,250,0.1); color: var(--auto-color); }
-    .trigger-system  { background: rgba(148,163,184,0.1); color: var(--system-color); }
-    .trigger-unknown { background: rgba(251,191,36,0.1);  color: var(--warning); }
+    .trigger-user    { background: var(--trigger-user-bg);  color: var(--user-color); }
+    .trigger-auto    { background: var(--trigger-auto-bg); color: var(--auto-color); }
+    .trigger-system  { background: var(--trigger-system-bg); color: var(--system-color); }
+    .trigger-unknown { background: var(--trigger-unknown-bg);  color: var(--warning); }
 
     .action-summary {
       flex: 1;
@@ -314,10 +573,10 @@
     }
 
     /* JSON syntax highlighting */
-    .json-key    { color: #93c5fd; }
-    .json-string { color: #86efac; }
-    .json-number { color: #fca5a5; }
-    .json-bool   { color: #fbbf24; }
+    .json-key    { color: var(--json-key); }
+    .json-string { color: var(--json-string); }
+    .json-number { color: var(--json-number); }
+    .json-bool   { color: var(--json-bool); }
     .json-null   { color: var(--text-dim); }
 
     /* ── Footer ── */
@@ -424,6 +683,7 @@
       <span>Action Logger</span>
     </div>
     <div class="header-actions">
+      <button class="btn btn-theme" id="btnTheme" title="Chuyển theme">🌙</button>
       <button class="btn btn-clear" id="btnClear" title="Xóa tất cả">🗑 Clear</button>
       <button class="btn btn-copy" id="btnCopy" title="Copy JSON">📋 Copy JSON</button>
       <button class="btn btn-record" id="btnRecord">▶ Start</button>

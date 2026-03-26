@@ -20,6 +20,7 @@ const statUser          = document.getElementById('statUser');
 const statAuto          = document.getElementById('statAuto');
 const statConsole       = document.getElementById('statConsole');
 const statTotal         = document.getElementById('statTotal');
+const btnTheme          = document.getElementById('btnTheme');
 const consoleBar        = document.getElementById('consoleBar');
 const consoleToggle     = document.getElementById('consoleToggle');
 const consoleFilterInput = document.getElementById('consoleFilterInput');
@@ -268,10 +269,48 @@ consoleFilterInput.addEventListener('input', () => {
 });
 
 // ─────────────────────────────────────────────
+//  THEME TOGGLE
+// ─────────────────────────────────────────────
+
+function getSystemTheme() {
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+function applyTheme(theme) {
+  if (theme === 'system') {
+    document.documentElement.removeAttribute('data-theme');
+    btnTheme.textContent = getSystemTheme() === 'dark' ? '☀️' : '🌙';
+    btnTheme.title = 'Theo hệ thống — nhấn để chuyển';
+  } else {
+    document.documentElement.setAttribute('data-theme', theme);
+    btnTheme.textContent = theme === 'dark' ? '☀️' : '🌙';
+    btnTheme.title = theme === 'dark' ? 'Chuyển sang Light' : 'Chuyển sang Dark';
+  }
+}
+
+// Cycle: system → dark → light → system
+btnTheme.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  let next;
+  if (!current) {
+    // system → opposite of system
+    next = getSystemTheme() === 'dark' ? 'light' : 'dark';
+  } else if (current === 'dark') {
+    next = 'light';
+  } else {
+    // light → back to system
+    next = 'system';
+  }
+  chrome.storage.local.set({ theme: next });
+  applyTheme(next);
+});
+
+// ─────────────────────────────────────────────
 //  LOAD STATE ON OPEN
 // ─────────────────────────────────────────────
 
-chrome.storage.local.get(['actions', 'isRecording', 'captureConsole'], (result) => {
+chrome.storage.local.get(['actions', 'isRecording', 'captureConsole', 'theme'], (result) => {
+  applyTheme(result.theme || 'system');
   allActions = result.actions || [];
   setRecordingState(result.isRecording || false);
   consoleToggle.checked = result.captureConsole || false;
