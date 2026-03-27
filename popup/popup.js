@@ -165,7 +165,7 @@ function render() {
         <span class="action-type-badge ${badgeClass}">${action.type.replace('_', ' ')}</span>
         <span class="trigger-badge ${triggerClass}">${triggerLabel}</span>
         <span class="action-summary">${getSummary(action)}</span>
-        ${action.count ? `<span class="action-count">×${action.count}</span>` : ''}
+        ${action.executeTimes ? `<span class="action-count">×${action.executeTimes}</span>` : ''}
         <span class="expand-icon">▶</span>
       </div>
       <div class="action-json">

@@ -40,8 +40,8 @@ let isProcessingQueue = false;
  */
 function isSameAction(a, b) {
   if (!a || !b) return false;
-  const { count: _a, ...restA } = a;
-  const { count: _b, ...restB } = b;
+  const { executeTimes: _a, ...restA } = a;
+  const { executeTimes: _b, ...restB } = b;
   return JSON.stringify(restA) === JSON.stringify(restB);
 }
 
@@ -49,7 +49,7 @@ function addAction(action) {
   // Dedup ngay trong queue
   const last = actionQueue[actionQueue.length - 1];
   if (isSameAction(last, action)) {
-    last.count = (last.count || 1) + 1;
+    last.executeTimes = (last.executeTimes || 1) + 1;
   } else {
     actionQueue.push(action);
   }
@@ -69,7 +69,7 @@ function processQueue() {
     for (const item of actionQueue) {
       const last = actions[actions.length - 1];
       if (isSameAction(last, item)) {
-        last.count = (last.count || 1) + (item.count || 1);
+        last.executeTimes = (last.executeTimes || 1) + (item.executeTimes || 1);
       } else {
         actions.push(item);
       }
