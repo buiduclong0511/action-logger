@@ -243,6 +243,7 @@ document.querySelectorAll('.filter-chip').forEach(chip => {
     document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
     chip.classList.add('active');
     activeFilter = chip.dataset.filter;
+    chrome.storage.local.set({ activeFilter });
     render();
   });
 });
@@ -309,12 +310,22 @@ btnTheme.addEventListener('click', () => {
 //  LOAD STATE ON OPEN
 // ─────────────────────────────────────────────
 
-chrome.storage.local.get(['actions', 'isRecording', 'captureConsole', 'theme'], (result) => {
+chrome.storage.local.get(['actions', 'isRecording', 'captureConsole', 'theme', 'activeFilter'], (result) => {
   applyTheme(result.theme || 'system');
   allActions = result.actions || [];
   setRecordingState(result.isRecording || false);
   consoleToggle.checked = result.captureConsole || false;
   consoleFilterInput.classList.toggle('visible', consoleToggle.checked);
+
+  // Khôi phục filter tab đã chọn trước đó
+  const savedFilter = result.activeFilter || 'all';
+  activeFilter = savedFilter;
+  document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+  const targetChip = document.querySelector(`.filter-chip[data-filter="${savedFilter}"]`);
+  if (targetChip) {
+    targetChip.classList.add('active');
+  }
+
   render();
 });
 

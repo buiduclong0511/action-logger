@@ -2,8 +2,6 @@
 
 Chrome Extension ghi lại toàn bộ thao tác người dùng (click, input, scroll, keydown, navigate) và thay đổi DOM tự động thành chuỗi JSON để debug.
 
-![Screenshot](screenshot-640x400.png)
-
 ## Tính năng
 
 - Ghi lại các thao tác người dùng: click, input, keydown, scroll, navigate
