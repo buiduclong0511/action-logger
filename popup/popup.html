@@ -386,6 +386,13 @@
     }
     .btn-copy:hover { background: var(--btn-copy-hover); }
 
+    .btn-copy-pretty {
+      color: var(--warning);
+      border-color: var(--btn-copy-border);
+      background: var(--btn-copy-bg);
+    }
+    .btn-copy-pretty:hover { background: var(--btn-copy-hover); }
+
     /* ── Stats bar ── */
     .stats-bar {
       display: flex;
@@ -539,9 +546,11 @@
     }
     .action-summary .highlight { color: var(--text); }
 
-    .action-time {
+
+    .action-count {
       font-size: 10px;
-      color: var(--muted);
+      font-weight: 600;
+      color: var(--accent);
       flex-shrink: 0;
       font-family: var(--mono);
     }
@@ -684,9 +693,10 @@
     </div>
     <div class="header-actions">
       <button class="btn btn-theme" id="btnTheme" title="Chuyển theme">🌙</button>
-      <button class="btn btn-clear" id="btnClear" title="Xóa tất cả">🗑 Clear</button>
-      <button class="btn btn-copy" id="btnCopy" title="Copy JSON">📋 Copy JSON</button>
-      <button class="btn btn-record" id="btnRecord">▶ Start</button>
+      <button class="btn btn-clear" id="btnClear" title="Xóa tất cả">🗑</button>
+      <button class="btn btn-copy" id="btnCopy" title="Copy JSON (compact)">📋</button>
+      <button class="btn btn-copy-pretty" id="btnCopyPretty" title="Copy JSON (pretty)">📄</button>
+      <button class="btn btn-record" id="btnRecord">▶</button>
     </div>
   </div>
 

@@ -35,8 +35,24 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
 let actionQueue = [];
 let isProcessingQueue = false;
 
+/**
+ * So sánh 2 action có trùng nhau không (bỏ qua field count)
+ */
+function isSameAction(a, b) {
+  if (!a || !b) return false;
+  const { count: _a, ...restA } = a;
+  const { count: _b, ...restB } = b;
+  return JSON.stringify(restA) === JSON.stringify(restB);
+}
+
 function addAction(action) {
-  actionQueue.push(action);
+  // Dedup ngay trong queue
+  const last = actionQueue[actionQueue.length - 1];
+  if (isSameAction(last, action)) {
+    last.count = (last.count || 1) + 1;
+  } else {
+    actionQueue.push(action);
+  }
   if (!isProcessingQueue) processQueue();
 }
 
@@ -48,7 +64,16 @@ function processQueue() {
   isProcessingQueue = true;
   chrome.storage.local.get(['actions'], (result) => {
     const actions = result.actions || [];
-    actions.push(...actionQueue);
+
+    // Dedup item đầu queue với item cuối storage
+    for (const item of actionQueue) {
+      const last = actions[actions.length - 1];
+      if (isSameAction(last, item)) {
+        last.count = (last.count || 1) + (item.count || 1);
+      } else {
+        actions.push(item);
+      }
+    }
     actionQueue = [];
 
     // Giữ tối đa MAX_ACTIONS action gần nhất

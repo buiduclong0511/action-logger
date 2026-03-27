@@ -13,6 +13,7 @@ const emptyState        = document.getElementById('emptyState');
 const btnRecord         = document.getElementById('btnRecord');
 const btnClear          = document.getElementById('btnClear');
 const btnCopy           = document.getElementById('btnCopy');
+const btnCopyPretty     = document.getElementById('btnCopyPretty');
 const logoDot           = document.getElementById('logoDot');
 const statusText        = document.getElementById('statusText');
 const copiedToast       = document.getElementById('copiedToast');
@@ -35,10 +36,6 @@ function escapeHtml(str) {
   return div.innerHTML;
 }
 
-function formatTime(ts) {
-  const d = new Date(ts);
-  return d.toTimeString().split(' ')[0] + '.' + String(d.getMilliseconds()).padStart(3, '0');
-}
 
 function getSummary(action) {
   switch (action.type) {
@@ -168,7 +165,7 @@ function render() {
         <span class="action-type-badge ${badgeClass}">${action.type.replace('_', ' ')}</span>
         <span class="trigger-badge ${triggerClass}">${triggerLabel}</span>
         <span class="action-summary">${getSummary(action)}</span>
-        <span class="action-time">${action.timestamp ? formatTime(action.timestamp) : ''}</span>
+        ${action.count ? `<span class="action-count">×${action.count}</span>` : ''}
         <span class="expand-icon">▶</span>
       </div>
       <div class="action-json">
@@ -193,12 +190,12 @@ function setRecordingState(recording) {
   isRecording = recording;
 
   if (recording) {
-    btnRecord.textContent = '⏹ Stop';
+    btnRecord.textContent = '⏹';
     btnRecord.className = 'btn btn-stop';
     logoDot.classList.remove('stopped');
     statusText.innerHTML = '<span class="status-recording">● Đang ghi...</span>';
   } else {
-    btnRecord.textContent = '▶ Start';
+    btnRecord.textContent = '▶';
     btnRecord.className = 'btn btn-record';
     logoDot.classList.add('stopped');
     statusText.textContent = '⏹ Đã dừng';
@@ -224,14 +221,12 @@ btnClear.addEventListener('click', () => {
   render();
 });
 
-btnCopy.addEventListener('click', () => {
+function getActionsForCopy() {
   let filtered = getFilteredActions();
 
   if (!consoleToggle.checked) {
-    // Console capture tắt → loại bỏ toàn bộ console actions khi copy
     filtered = filtered.filter(a => a.type !== 'console');
   } else if (consoleFilter) {
-    // Console capture bật + có filter → chỉ giữ console logs khớp
     const keyword = consoleFilter.toLowerCase();
     filtered = filtered.filter(a => {
       if (a.type !== 'console') return true;
@@ -240,10 +235,22 @@ btnCopy.addEventListener('click', () => {
     });
   }
 
-  navigator.clipboard.writeText(JSON.stringify(filtered)).then(() => {
+  return filtered;
+}
+
+function copyAndToast(text) {
+  navigator.clipboard.writeText(text).then(() => {
     copiedToast.classList.add('show');
     setTimeout(() => copiedToast.classList.remove('show'), 2000);
   });
+}
+
+btnCopy.addEventListener('click', () => {
+  copyAndToast(JSON.stringify(getActionsForCopy()));
+});
+
+btnCopyPretty.addEventListener('click', () => {
+  copyAndToast(JSON.stringify(getActionsForCopy(), null, 2));
 });
 
 // ─────────────────────────────────────────────

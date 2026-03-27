@@ -73,7 +73,6 @@
     if (!isRecording) return;
     const enriched = {
       ...action,
-      timestamp: Date.now(),
     };
     chrome.runtime.sendMessage({ type: 'ADD_ACTION', payload: enriched });
   }
@@ -89,7 +88,6 @@
     const nav = {
       type: 'navigate',
       trigger: 'system',
-      timestamp: Date.now(),
       ...(lastRecordedUrl ? { from: lastRecordedUrl } : {}),
       to: currentUrl,
     };
