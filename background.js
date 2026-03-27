@@ -31,14 +31,29 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
   }
 });
 
+// Queue để tránh race condition khi nhiều message đến liên tiếp
+let actionQueue = [];
+let isProcessingQueue = false;
+
 function addAction(action) {
+  actionQueue.push(action);
+  if (!isProcessingQueue) processQueue();
+}
+
+function processQueue() {
+  if (actionQueue.length === 0) {
+    isProcessingQueue = false;
+    return;
+  }
+  isProcessingQueue = true;
   chrome.storage.local.get(['actions'], (result) => {
     const actions = result.actions || [];
-    actions.push(action);
+    actions.push(...actionQueue);
+    actionQueue = [];
 
     // Giữ tối đa MAX_ACTIONS action gần nhất
     const trimmed = actions.slice(-MAX_ACTIONS);
-    chrome.storage.local.set({ actions: trimmed });
+    chrome.storage.local.set({ actions: trimmed }, processQueue);
   });
 }
 

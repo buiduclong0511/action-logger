@@ -50,8 +50,20 @@ function getSummary(action) {
       return `key: <span class="highlight">${action.key}</span> on ${action.selector || '?'}`;
     case 'scroll':
       return `scrollY: <span class="highlight">${action.scrollY}</span>`;
-    case 'dom_mutation':
-      return `<span class="highlight">${action.selector || '?'}</span> [${action.mutationKind}] → <span class="highlight">${JSON.stringify(action.newValue)?.slice(0, 30) || ''}</span>`;
+    case 'dom_mutation': {
+      let mutationDetail = '';
+      if (action.classChange) {
+        const parts = [];
+        if (action.classChange.added) parts.push(`+${action.classChange.added.join(' +')}`);
+        if (action.classChange.removed) parts.push(`-${action.classChange.removed.join(' -')}`);
+        mutationDetail = parts.join(' ');
+      } else if (action.newValue !== undefined) {
+        mutationDetail = JSON.stringify(action.newValue)?.slice(0, 30) || '';
+      } else if (action.text) {
+        mutationDetail = action.text.slice(0, 30);
+      }
+      return `<span class="highlight">${action.selector || action.parentSelector || '?'}</span> [${action.mutationKind}] → <span class="highlight">${escapeHtml(mutationDetail)}</span>`;
+    }
     case 'navigate':
       return `→ <span class="highlight">${action.to || ''}</span>`;
     case 'console': {

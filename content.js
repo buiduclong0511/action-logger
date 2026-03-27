@@ -13,6 +13,7 @@
   let isRecording = false;
   let lastUserActionTime = 0;
   let lastUserActionSelector = null;
+  let lastRecordedUrl = null; // chỉ gửi url khi thay đổi
   const AUTO_CAUSE_WINDOW_MS = 500; // nếu mutation xảy ra trong 500ms sau user action → gán causedBy
 
   // ─────────────────────────────────────────────
@@ -73,9 +74,27 @@
     const enriched = {
       ...action,
       timestamp: Date.now(),
-      url: window.location.href,
     };
     chrome.runtime.sendMessage({ type: 'ADD_ACTION', payload: enriched });
+  }
+
+  /**
+   * Gửi item navigate khi URL thay đổi (SPA hoặc page load)
+   */
+  function emitNavigateIfChanged() {
+    if (!isRecording) return;
+    const currentUrl = window.location.href;
+    if (currentUrl === lastRecordedUrl) return;
+
+    const nav = {
+      type: 'navigate',
+      trigger: 'system',
+      timestamp: Date.now(),
+      ...(lastRecordedUrl ? { from: lastRecordedUrl } : {}),
+      to: currentUrl,
+    };
+    lastRecordedUrl = currentUrl;
+    chrome.runtime.sendMessage({ type: 'ADD_ACTION', payload: nav });
   }
 
   // ─────────────────────────────────────────────
@@ -192,6 +211,31 @@
         if (attr === 'style') continue;
 
         const causedBy = getCausedBy();
+
+        // Với class attribute → chỉ log diff thay vì full string (tiết kiệm token)
+        if (attr === 'class') {
+          const oldClasses = oldVal ? oldVal.split(/\s+/).filter(Boolean) : [];
+          const newClasses = newVal ? newVal.split(/\s+/).filter(Boolean) : [];
+          const added = newClasses.filter(c => !oldClasses.includes(c));
+          const removed = oldClasses.filter(c => !newClasses.includes(c));
+
+          // Bỏ qua nếu diff rỗng (chỉ thay đổi whitespace)
+          if (added.length === 0 && removed.length === 0) continue;
+
+          sendAction({
+            type: 'dom_mutation',
+            trigger: causedBy ? 'auto' : 'unknown',
+            mutationKind: 'attribute',
+            selector: getSelector(target),
+            attribute: 'class',
+            classChange: {
+              ...(added.length > 0 && { added }),
+              ...(removed.length > 0 && { removed }),
+            },
+            ...(causedBy && { causedBy }),
+          });
+          continue;
+        }
 
         sendAction({
           type: 'dom_mutation',
@@ -343,8 +387,28 @@
   //  START / STOP RECORDING
   // ─────────────────────────────────────────────
 
+  // ── SPA Navigation detection ──
+  // Monkey-patch pushState/replaceState để detect SPA navigation
+  const originalPushState = history.pushState.bind(history);
+  const originalReplaceState = history.replaceState.bind(history);
+
+  history.pushState = function (...args) {
+    originalPushState(...args);
+    emitNavigateIfChanged();
+  };
+
+  history.replaceState = function (...args) {
+    originalReplaceState(...args);
+    emitNavigateIfChanged();
+  };
+
+  function onPopState() {
+    emitNavigateIfChanged();
+  }
+
   function startRecording() {
     isRecording = true;
+    lastRecordedUrl = null; // reset để url đầu tiên luôn được ghi
     snapshotExistingInputs();
 
     document.addEventListener('pointerup', onPointerUp, true);
@@ -352,6 +416,7 @@
     document.addEventListener('keydown', onKeyDown, true);
     document.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('__action_logger_console__', onConsoleCapture);
+    window.addEventListener('popstate', onPopState);
 
     mutationObserver.observe(document.body, {
       subtree: true,
@@ -364,6 +429,8 @@
 
     startValuePolling();
 
+    // Ghi URL ban đầu rồi recording_started
+    emitNavigateIfChanged();
     sendAction({ type: 'recording_started', trigger: 'system' });
   }
 
@@ -375,6 +442,7 @@
     document.removeEventListener('keydown', onKeyDown, true);
     document.removeEventListener('scroll', onScroll);
     window.removeEventListener('__action_logger_console__', onConsoleCapture);
+    window.removeEventListener('popstate', onPopState);
 
     mutationObserver.disconnect();
     stopValuePolling();
