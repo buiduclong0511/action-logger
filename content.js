@@ -169,13 +169,25 @@
   // ─────────────────────────────────────────────
 
   const observedValues = new WeakMap(); // lưu value cũ của mỗi input
+  let trackedInputs = new Set(); // cache danh sách input đang theo dõi
+
+  /**
+   * Thêm element vào cache tracking
+   */
+  function trackInput(el) {
+    if (!trackedInputs.has(el)) {
+      trackedInputs.add(el);
+      observedValues.set(el, getValue(el));
+    }
+  }
 
   /**
    * Snapshot value ban đầu của tất cả input hiện có
    */
   function snapshotExistingInputs() {
+    trackedInputs = new Set();
     document.querySelectorAll('input, textarea, select').forEach(el => {
-      observedValues.set(el, getValue(el));
+      trackInput(el);
     });
   }
 
@@ -274,10 +286,14 @@
         mutation.addedNodes.forEach(node => {
           if (node.nodeType !== 1) return; // chỉ elements
 
-          // Snapshot input mới
+          // Snapshot input mới vào cache
           node.querySelectorAll?.('input, textarea, select').forEach(el => {
-            observedValues.set(el, getValue(el));
+            trackInput(el);
           });
+          // Bản thân node cũng có thể là input
+          if (['INPUT', 'TEXTAREA', 'SELECT'].includes(node.tagName)) {
+            trackInput(node);
+          }
 
           // Log element được thêm vào DOM
           const text = node.textContent?.trim().slice(0, 120) || '';
@@ -297,6 +313,14 @@
 
         mutation.removedNodes.forEach(node => {
           if (node.nodeType !== 1) return;
+
+          // Loại input bị xóa khỏi cache
+          node.querySelectorAll?.('input, textarea, select').forEach(el => {
+            trackedInputs.delete(el);
+          });
+          if (['INPUT', 'TEXTAREA', 'SELECT'].includes(node.tagName)) {
+            trackedInputs.delete(node);
+          }
 
           const text = node.textContent?.trim().slice(0, 120) || '';
           if (!text) return;
@@ -325,18 +349,18 @@
     pollingInterval = setInterval(() => {
       if (!isRecording) return;
 
-      document.querySelectorAll('input, textarea, select').forEach(el => {
+      for (const el of trackedInputs) {
+        // Element đã bị xóa khỏi DOM → loại khỏi cache
+        if (!el.isConnected) {
+          trackedInputs.delete(el);
+          continue;
+        }
+
         const currentValue = getValue(el);
         const previousValue = observedValues.get(el);
 
-        // Element mới chưa được snapshot
-        if (previousValue === undefined) {
-          observedValues.set(el, currentValue);
-          return;
-        }
-
         // Không thay đổi
-        if (JSON.stringify(currentValue) === JSON.stringify(previousValue)) return;
+        if (JSON.stringify(currentValue) === JSON.stringify(previousValue)) continue;
 
         // Đã thay đổi → cập nhật snapshot
         observedValues.set(el, currentValue);
@@ -353,7 +377,7 @@
           newValue: currentValue,
           ...(causedBy && { causedBy }),
         });
-      });
+      }
     }, 150); // poll mỗi 150ms
   }
 
@@ -444,6 +468,7 @@
 
     mutationObserver.disconnect();
     stopValuePolling();
+    trackedInputs = new Set();
   }
 
   // ─────────────────────────────────────────────

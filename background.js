@@ -3,7 +3,6 @@
 //  Nhận actions từ content.js, lưu vào storage
 // ─────────────────────────────────────────────
 
-const MAX_ACTIONS = 500; // giới hạn số action lưu trữ
 
 chrome.runtime.onMessage.addListener((msg, sender) => {
   if (msg.type === 'ADD_ACTION') {
@@ -15,8 +14,7 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
   }
 
   if (msg.type === 'START_RECORDING') {
-    chrome.storage.local.set({ isRecording: true });
-    // Gửi tới tất cả tabs đang active
+    chrome.storage.local.set({ isRecording: true, actions: [] });
     broadcastToActiveTabs({ type: 'START_RECORDING' });
   }
 
@@ -76,9 +74,7 @@ function processQueue() {
     }
     actionQueue = [];
 
-    // Giữ tối đa MAX_ACTIONS action gần nhất
-    const trimmed = actions.slice(-MAX_ACTIONS);
-    chrome.storage.local.set({ actions: trimmed }, processQueue);
+    chrome.storage.local.set({ actions }, processQueue);
   });
 }
 
