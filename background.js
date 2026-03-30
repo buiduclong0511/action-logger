@@ -1,24 +1,36 @@
 // ─────────────────────────────────────────────
 //  BACKGROUND SERVICE WORKER
-//  Nhận actions từ content.js, lưu vào storage
+//  Nhận actions từ content.js, lưu vào storage hoặc memory
 // ─────────────────────────────────────────────
 
+let persistMode = false;
+let bgIsRecording = false;
+let inMemoryActions = [];
 
-chrome.runtime.onMessage.addListener((msg, sender) => {
+// Khôi phục persistMode khi service worker restart
+chrome.storage.local.get(['persistMode'], (result) => {
+  persistMode = result.persistMode || false;
+});
+
+chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.type === 'ADD_ACTION') {
     addAction(msg.payload);
   }
 
   if (msg.type === 'CLEAR_ACTIONS') {
+    inMemoryActions = [];
     chrome.storage.local.set({ actions: [] });
   }
 
   if (msg.type === 'START_RECORDING') {
+    bgIsRecording = true;
+    inMemoryActions = [];
     chrome.storage.local.set({ isRecording: true, actions: [] });
     broadcastToActiveTabs({ type: 'START_RECORDING' });
   }
 
   if (msg.type === 'STOP_RECORDING') {
+    bgIsRecording = false;
     chrome.storage.local.set({ isRecording: false });
     broadcastToActiveTabs({ type: 'STOP_RECORDING' });
   }
@@ -27,9 +39,25 @@ chrome.runtime.onMessage.addListener((msg, sender) => {
     chrome.storage.local.set({ captureConsole: msg.payload });
     broadcastToActiveTabs({ type: 'SET_CAPTURE_CONSOLE', payload: msg.payload });
   }
+
+  if (msg.type === 'GET_ACTIONS') {
+    sendResponse({ actions: inMemoryActions });
+    return true;
+  }
+
+  if (msg.type === 'SET_PERSIST_MODE') {
+    if (bgIsRecording) {
+      sendResponse({ error: 'RECORDING_ACTIVE' });
+      return true;
+    }
+    persistMode = msg.payload.enabled;
+    chrome.storage.local.set({ persistMode });
+    sendResponse({ ok: true });
+    return true;
+  }
 });
 
-// Queue để tránh race condition khi nhiều message đến liên tiếp
+// Queue để tránh race condition khi nhiều message đến liên tiếp (storage mode)
 let actionQueue = [];
 let isProcessingQueue = false;
 
@@ -44,14 +72,24 @@ function isSameAction(a, b) {
 }
 
 function addAction(action) {
-  // Dedup ngay trong queue
-  const last = actionQueue[actionQueue.length - 1];
-  if (isSameAction(last, action)) {
-    last.executeTimes = (last.executeTimes || 1) + 1;
+  if (persistMode) {
+    // Storage mode — queue and write
+    const last = actionQueue[actionQueue.length - 1];
+    if (isSameAction(last, action)) {
+      last.executeTimes = (last.executeTimes || 1) + 1;
+    } else {
+      actionQueue.push(action);
+    }
+    if (!isProcessingQueue) processQueue();
   } else {
-    actionQueue.push(action);
+    // Messaging mode — dedup in memory
+    const last = inMemoryActions[inMemoryActions.length - 1];
+    if (isSameAction(last, action)) {
+      last.executeTimes = (last.executeTimes || 1) + 1;
+    } else {
+      inMemoryActions.push(action);
+    }
   }
-  if (!isProcessingQueue) processQueue();
 }
 
 function processQueue() {

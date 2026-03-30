@@ -87,8 +87,6 @@
 
     const nav = {
       type: 'navigate',
-      trigger: 'system',
-      ...(lastRecordedUrl ? { from: lastRecordedUrl } : {}),
       to: currentUrl,
     };
     lastRecordedUrl = currentUrl;
@@ -116,11 +114,9 @@
 
     sendAction({
       type: 'click',
-      trigger: 'user',
       selector: lastUserActionSelector,
-      tagName: tag,
       text: el.innerText?.trim().slice(0, 80) || null,
-      href: el.href || null,
+      ...(el.href && { href: el.href }),
     });
   }
 
@@ -133,7 +129,6 @@
 
     sendAction({
       type: 'input',
-      trigger: 'user',
       selector: lastUserActionSelector,
       inputType: el.type || el.tagName.toLowerCase(),
       value: getValue(el),
@@ -149,18 +144,8 @@
 
     sendAction({
       type: 'keydown',
-      trigger: 'user',
       key,
       selector: lastUserActionSelector,
-    });
-  }
-
-  function onScroll() {
-    sendAction({
-      type: 'scroll',
-      trigger: 'user',
-      scrollX: window.scrollX,
-      scrollY: window.scrollY,
     });
   }
 
@@ -233,9 +218,9 @@
           if (added.length === 0 && removed.length === 0) continue;
 
           sendAction({
-            type: 'dom_mutation',
-            trigger: causedBy ? 'auto' : 'unknown',
-            mutationKind: 'attribute',
+            type: 'dom',
+            ...(causedBy && { trigger: 'auto' }),
+            mutationKind: 'attr',
             selector: getSelector(target),
             attribute: 'class',
             classChange: {
@@ -248,9 +233,9 @@
         }
 
         sendAction({
-          type: 'dom_mutation',
-          trigger: causedBy ? 'auto' : 'unknown',
-          mutationKind: 'attribute',
+          type: 'dom',
+          ...(causedBy && { trigger: 'auto' }),
+          mutationKind: 'attr',
           selector: getSelector(target),
           attribute: attr,
           oldValue: oldVal,
@@ -269,8 +254,8 @@
 
         const causedBy = getCausedBy();
         sendAction({
-          type: 'dom_mutation',
-          trigger: causedBy ? 'auto' : 'unknown',
+          type: 'dom',
+          ...(causedBy && { trigger: 'auto' }),
           mutationKind: 'textContent',
           selector: getSelector(el),
           oldValue: mutation.oldValue,
@@ -300,12 +285,11 @@
           if (!text) return; // bỏ qua node rỗng
 
           sendAction({
-            type: 'dom_mutation',
-            trigger: causedBy ? 'auto' : 'unknown',
-            mutationKind: 'childList:added',
+            type: 'dom',
+            ...(causedBy && { trigger: 'auto' }),
+            mutationKind: 'added',
             selector: getSelector(node),
             parentSelector: getSelector(mutation.target),
-            tagName: node.tagName?.toLowerCase(),
             text,
             ...(causedBy && { causedBy }),
           });
@@ -326,11 +310,10 @@
           if (!text) return;
 
           sendAction({
-            type: 'dom_mutation',
-            trigger: causedBy ? 'auto' : 'unknown',
-            mutationKind: 'childList:removed',
+            type: 'dom',
+            ...(causedBy && { trigger: 'auto' }),
+            mutationKind: 'removed',
             parentSelector: getSelector(mutation.target),
-            tagName: node.tagName?.toLowerCase(),
             text,
             ...(causedBy && { causedBy }),
           });
@@ -368,8 +351,8 @@
         const causedBy = getCausedBy();
 
         sendAction({
-          type: 'dom_mutation',
-          trigger: causedBy ? 'auto' : 'unknown',
+          type: 'dom',
+          ...(causedBy && { trigger: 'auto' }),
           mutationKind: 'value',
           selector: getSelector(el),
           fieldName: el.name || el.id || null,
@@ -444,7 +427,6 @@
     document.addEventListener('pointerup', onPointerUp, true);
     document.addEventListener('input', onInput, true);
     document.addEventListener('keydown', onKeyDown, true);
-    document.addEventListener('scroll', onScroll, { passive: true });
     window.addEventListener('__action_logger_console__', onConsoleCapture);
     window.addEventListener('popstate', onPopState);
 
@@ -459,9 +441,7 @@
 
     startValuePolling();
 
-    // Ghi URL ban đầu rồi recording_started
     emitNavigateIfChanged();
-    sendAction({ type: 'recording_started', trigger: 'system' });
   }
 
   function stopRecording() {
@@ -470,7 +450,6 @@
     document.removeEventListener('pointerup', onPointerUp, true);
     document.removeEventListener('input', onInput, true);
     document.removeEventListener('keydown', onKeyDown, true);
-    document.removeEventListener('scroll', onScroll);
     window.removeEventListener('__action_logger_console__', onConsoleCapture);
     window.removeEventListener('popstate', onPopState);
 

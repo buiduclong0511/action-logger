@@ -289,8 +289,8 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      width: 100%;
-      height: 100vh;
+      min-width: 480px;
+      height: 600px;
       background: var(--bg);
       color: var(--text);
       font-family: var(--sans);
@@ -505,11 +505,9 @@
     .badge-click    { background: var(--badge-click-bg);  color: var(--badge-click-fg); }
     .badge-input    { background: var(--badge-input-bg);  color: var(--badge-input-fg); }
     .badge-keydown  { background: var(--badge-keydown-bg);  color: var(--badge-keydown-fg); }
-    .badge-scroll   { background: var(--badge-scroll-bg);  color: var(--badge-scroll-fg); }
-    .badge-dom_mutation { background: var(--badge-dom-bg); color: var(--badge-dom-fg); }
+    .badge-dom { background: var(--badge-dom-bg); color: var(--badge-dom-fg); }
     .badge-navigate { background: var(--badge-navigate-bg);  color: var(--badge-navigate-fg); }
     .badge-console  { background: var(--badge-console-bg); color: var(--badge-console-fg); }
-    .badge-recording_started { background: var(--badge-recording-bg); color: var(--badge-recording-fg); }
 
     /* Console method sub-badges */
     .console-method {
@@ -660,14 +658,43 @@
       background: var(--accent);
     }
 
+    .toggle input:disabled + .toggle-slider { opacity: 0.5; cursor: not-allowed; }
+
     .console-label {
       font-size: 11px;
       color: var(--text-dim);
       flex-shrink: 0;
+      cursor: pointer;
+      user-select: none;
     }
 
+    .toggles-bar {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 6px 16px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+
+    .toggle-group {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .console-filter-bar {
+      display: none;
+      padding: 4px 16px 6px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .console-filter-bar.visible { display: block; }
+
     .console-filter-input {
-      flex: 1;
+      width: 100%;
       background: var(--bg);
       border: 1px solid var(--border);
       border-radius: 4px;
@@ -677,9 +704,8 @@
       color: var(--text);
       outline: none;
       transition: border-color 0.15s;
-      display: none;
+      box-sizing: border-box;
     }
-    .console-filter-input.visible { display: block; }
     .console-filter-input:focus { border-color: var(--accent); }
     .console-filter-input::placeholder { color: var(--muted); }
   </style>
@@ -737,18 +763,31 @@
     <button class="filter-chip chip-auto" data-filter="auto">⚡ Auto</button>
     <button class="filter-chip" data-filter="click">Click</button>
     <button class="filter-chip" data-filter="input">Input</button>
-    <button class="filter-chip" data-filter="dom_mutation">Mutation</button>
+    <button class="filter-chip" data-filter="dom">Mutation</button>
     <button class="filter-chip" data-filter="console">🖥 Console</button>
   </div>
 
-  <!-- CONSOLE TOGGLE & FILTER -->
-  <div class="console-bar" id="consoleBar">
-    <label class="toggle">
-      <input type="checkbox" id="consoleToggle" />
-      <span class="toggle-slider"></span>
-    </label>
-    <span class="console-label">Console capture</span>
-    <input type="text" class="console-filter-input" id="consoleFilterInput" placeholder="Filter console logs..." />
+  <!-- TOGGLES BAR -->
+  <div class="toggles-bar">
+    <div class="toggle-group">
+      <label class="toggle" for="consoleToggle">
+        <input type="checkbox" id="consoleToggle" />
+        <span class="toggle-slider"></span>
+      </label>
+      <label class="console-label" for="consoleToggle">Console</label>
+    </div>
+    <div class="toggle-group">
+      <label class="toggle" for="persistToggle">
+        <input type="checkbox" id="persistToggle" />
+        <span class="toggle-slider"></span>
+      </label>
+      <label class="console-label" for="persistToggle">Persist</label>
+    </div>
+  </div>
+
+  <!-- CONSOLE FILTER (hiện khi console capture bật) -->
+  <div class="console-filter-bar" id="consoleFilterBar">
+    <input type="text" class="console-filter-input visible" id="consoleFilterInput" placeholder="Filter console logs..." />
   </div>
 
   <!-- ACTIONS LIST -->
