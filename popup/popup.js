@@ -21,6 +21,7 @@ const statUser          = document.getElementById('statUser');
 const statAuto          = document.getElementById('statAuto');
 const statConsole       = document.getElementById('statConsole');
 const statTotal         = document.getElementById('statTotal');
+const statTokens        = document.getElementById('statTokens');
 const btnTheme          = document.getElementById('btnTheme');
 const consoleBar        = document.getElementById('consoleBar');
 const consoleToggle     = document.getElementById('consoleToggle');
@@ -131,6 +132,10 @@ function updateStats() {
   statAuto.textContent = autoCount;
   statConsole.textContent = consoleCount;
   statTotal.textContent = allActions.length;
+
+  const copyText = JSON.stringify(getActionsForCopy());
+  const tokens = estimateTokens(copyText);
+  statTokens.textContent = formatTokenCount(tokens);
 }
 
 function render() {
@@ -235,7 +240,12 @@ function getActionsForCopy() {
     });
   }
 
-  return filtered;
+  return filtered.map(a => {
+    if (a.type !== 'console') return a;
+    const tokens = estimateTokens(JSON.stringify(a));
+    if (tokens <= 500) return a;
+    return { ...a, args: ['...'], truncated: true };
+  });
 }
 
 function estimateTokens(text) {
@@ -251,8 +261,6 @@ function formatTokenCount(tokens) {
 
 function copyAndToast(text) {
   navigator.clipboard.writeText(text).then(() => {
-    const tokens = estimateTokens(text);
-    copiedToast.textContent = `✓ Đã copy! (~${formatTokenCount(tokens)} tokens)`;
     copiedToast.classList.add('show');
     setTimeout(() => copiedToast.classList.remove('show'), 2000);
   });

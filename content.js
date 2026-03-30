@@ -395,14 +395,22 @@
   function onConsoleCapture(e) {
     const { method, args, source, isUncaught } = e.detail;
 
-    sendAction({
+    const action = {
       type: 'console',
       trigger: 'auto',
       method,
       args,
       ...(source && { source }),
       ...(isUncaught && { isUncaught }),
-    });
+    };
+
+    const tokens = Math.ceil(JSON.stringify(action).length / 4);
+    if (tokens > 500) {
+      action.args = ['...'];
+      action.truncated = true;
+    }
+
+    sendAction(action);
   }
 
   // ─────────────────────────────────────────────
