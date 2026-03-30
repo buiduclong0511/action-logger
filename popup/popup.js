@@ -238,8 +238,21 @@ function getActionsForCopy() {
   return filtered;
 }
 
+function estimateTokens(text) {
+  return Math.ceil(text.length / 4);
+}
+
+function formatTokenCount(tokens) {
+  if (tokens >= 1000) {
+    return (tokens / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  }
+  return String(tokens);
+}
+
 function copyAndToast(text) {
   navigator.clipboard.writeText(text).then(() => {
+    const tokens = estimateTokens(text);
+    copiedToast.textContent = `✓ Đã copy! (~${formatTokenCount(tokens)} tokens)`;
     copiedToast.classList.add('show');
     setTimeout(() => copiedToast.classList.remove('show'), 2000);
   });
