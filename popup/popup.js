@@ -236,10 +236,6 @@ function getFilteredActions() {
   });
 }
 
-// Cache token count — chỉ tính lại khi data thay đổi
-let cachedTokenCount = 0;
-let lastActionCount = -1;
-
 function updateStats() {
   let userCount = 0;
   let autoCount = 0;
@@ -261,12 +257,9 @@ function updateStats() {
   statConsole.textContent = consoleCount;
   statTotal.textContent = allActions.length;
 
-  // Chỉ tính lại token khi data thay đổi
-  if (allActions.length !== lastActionCount) {
-    lastActionCount = allActions.length;
-    cachedTokenCount = estimateTokens(JSON.stringify(getActionsForCopy()));
-  }
-  statTokens.textContent = formatTokenCount(cachedTokenCount);
+  // Token count theo filtered list (tab đang active)
+  const tokens = estimateTokens(JSON.stringify(filteredActions));
+  statTokens.textContent = formatTokenCount(tokens);
 }
 
 function render() {
