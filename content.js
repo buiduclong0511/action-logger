@@ -387,12 +387,6 @@
       ...(isUncaught && { isUncaught }),
     };
 
-    const tokens = Math.ceil(JSON.stringify(action).length / 4);
-    if (tokens > 500) {
-      action.args = ['...'];
-      action.truncated = true;
-    }
-
     sendAction(action);
   }
 

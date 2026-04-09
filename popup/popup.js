@@ -340,13 +340,7 @@ function getActionsForCopy() {
     });
   }
 
-  return filtered.map(a => {
-    if (a.type !== 'console') return a;
-    // Ước lượng nhanh bằng length thay vì JSON.stringify từng item
-    const len = (a.args || []).reduce((sum, arg) => sum + String(arg).length, 0);
-    if (len <= 1500) return a; // ~1500 chars ≈ ~375 tokens + overhead < 500
-    return { ...a, args: ['...'], truncated: true };
-  });
+  return filtered;
 }
 
 function estimateTokens(text) {
