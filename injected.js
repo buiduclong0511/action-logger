@@ -1,11 +1,18 @@
 // ─────────────────────────────────────────────
 //  INJECTED SCRIPT — Chạy trong main world của trang
-//  Override console methods, gửi data về content script qua CustomEvent
+//  Chỉ override console.* khi đang record, restore lại khi stop
+//  để DevTools hiển thị đúng vị trí log thật khi không record.
 // ─────────────────────────────────────────────
 
 (() => {
+  if (window.__action_logger_loaded__) return;
+  window.__action_logger_loaded__ = true;
+
   const METHODS = ['log', 'warn', 'error', 'info', 'debug'];
   const originals = {};
+  METHODS.forEach(m => { originals[m] = console[m]; });
+
+  let active = false;
 
   /**
    * Serialize argument an toàn — tránh circular reference và object quá lớn
@@ -41,32 +48,7 @@
     return String(arg);
   }
 
-  METHODS.forEach(method => {
-    originals[method] = console[method];
-
-    console[method] = function (...args) {
-      // Gọi console gốc trước
-      originals[method].apply(console, args);
-
-      // Gửi event về content script
-      try {
-        const serializedArgs = args.map(safeSerialize);
-
-        window.dispatchEvent(new CustomEvent('__action_logger_console__', {
-          detail: {
-            method,
-            args: serializedArgs,
-            timestamp: Date.now(),
-          },
-        }));
-      } catch {
-        // Không để lỗi serialize ảnh hưởng console gốc
-      }
-    };
-  });
-
-  // Capture unhandled errors
-  window.addEventListener('error', (event) => {
+  function onError(event) {
     window.dispatchEvent(new CustomEvent('__action_logger_console__', {
       detail: {
         method: 'error',
@@ -76,10 +58,9 @@
         isUncaught: true,
       },
     }));
-  });
+  }
 
-  // Capture unhandled promise rejections
-  window.addEventListener('unhandledrejection', (event) => {
+  function onRejection(event) {
     const reason = event.reason instanceof Error
       ? `${event.reason.name}: ${event.reason.message}`
       : safeSerialize(event.reason);
@@ -92,5 +73,51 @@
         isUncaught: true,
       },
     }));
-  });
+  }
+
+  function overrideConsole() {
+    METHODS.forEach(method => {
+      console[method] = function (...args) {
+        originals[method].apply(console, args);
+
+        try {
+          const serializedArgs = args.map(safeSerialize);
+          window.dispatchEvent(new CustomEvent('__action_logger_console__', {
+            detail: {
+              method,
+              args: serializedArgs,
+              timestamp: Date.now(),
+            },
+          }));
+        } catch {
+          // Không để lỗi serialize ảnh hưởng console gốc
+        }
+      };
+    });
+  }
+
+  function restoreConsole() {
+    METHODS.forEach(method => {
+      console[method] = originals[method];
+    });
+  }
+
+  function start() {
+    if (active) return;
+    active = true;
+    overrideConsole();
+    window.addEventListener('error', onError);
+    window.addEventListener('unhandledrejection', onRejection);
+  }
+
+  function stop() {
+    if (!active) return;
+    active = false;
+    restoreConsole();
+    window.removeEventListener('error', onError);
+    window.removeEventListener('unhandledrejection', onRejection);
+  }
+
+  window.addEventListener('__action_logger_start__', start);
+  window.addEventListener('__action_logger_stop__', stop);
 })();

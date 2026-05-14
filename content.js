@@ -1,16 +1,9 @@
 (() => {
   // ─────────────────────────────────────────────
-  //  INJECT CONSOLE CAPTURE SCRIPT INTO MAIN WORLD
-  // ─────────────────────────────────────────────
-  const script = document.createElement('script');
-  script.src = chrome.runtime.getURL('injected.js');
-  script.onload = () => script.remove();
-  (document.head || document.documentElement).appendChild(script);
-
-  // ─────────────────────────────────────────────
   //  STATE
   // ─────────────────────────────────────────────
   let isRecording = false;
+  let injectedLoaded = false; // injected.js đã được inject vào main world chưa
   let lastUserActionTime = 0;
   let lastUserActionSelector = null;
   let lastRecordedUrl = null; // chỉ gửi url khi thay đổi
@@ -413,6 +406,26 @@
     emitNavigateIfChanged();
   }
 
+  /**
+   * Inject script vào main world chỉ khi cần (lần đầu start record).
+   * Sau khi load xong, nếu vẫn đang record thì dispatch event start.
+   */
+  let injecting = false;
+  function injectIfNeeded() {
+    if (injecting || injectedLoaded) return;
+    injecting = true;
+    const script = document.createElement('script');
+    script.src = chrome.runtime.getURL('injected.js');
+    script.onload = () => {
+      script.remove();
+      injectedLoaded = true;
+      if (isRecording) {
+        window.dispatchEvent(new CustomEvent('__action_logger_start__'));
+      }
+    };
+    (document.head || document.documentElement).appendChild(script);
+  }
+
   function startRecording() {
     isRecording = true;
     lastRecordedUrl = null; // reset để url đầu tiên luôn được ghi
@@ -435,6 +448,12 @@
 
     startValuePolling();
 
+    // Inject console capture script vào main world (lazy)
+    injectIfNeeded();
+    if (injectedLoaded) {
+      window.dispatchEvent(new CustomEvent('__action_logger_start__'));
+    }
+
     emitNavigateIfChanged();
   }
 
@@ -450,6 +469,11 @@
     mutationObserver.disconnect();
     stopValuePolling();
     trackedInputs = new Set();
+
+    // Dispatch stop để injected script restore console gốc
+    if (injectedLoaded) {
+      window.dispatchEvent(new CustomEvent('__action_logger_stop__'));
+    }
   }
 
   // ─────────────────────────────────────────────
