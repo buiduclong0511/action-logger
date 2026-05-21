@@ -427,6 +427,8 @@
   }
 
   function startRecording() {
+    if (isRecording) return;
+
     isRecording = true;
     lastRecordedUrl = null; // reset để url đầu tiên luôn được ghi
     snapshotExistingInputs();
@@ -458,6 +460,8 @@
   }
 
   function stopRecording() {
+    if (!isRecording) return;
+
     isRecording = false;
 
     document.removeEventListener('pointerup', onPointerUp, true);
@@ -485,6 +489,16 @@
     if (msg.type === 'STOP_RECORDING') stopRecording();
     if (msg.type === 'GET_STATUS') {
       chrome.runtime.sendMessage({ type: 'STATUS', payload: { isRecording } });
+    }
+  });
+
+  chrome.storage.onChanged.addListener((changes, areaName) => {
+    if (areaName !== 'local' || !changes.isRecording) return;
+
+    if (changes.isRecording.newValue) {
+      startRecording();
+    } else {
+      stopRecording();
     }
   });
 

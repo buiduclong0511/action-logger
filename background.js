@@ -7,9 +7,10 @@ let persistMode = false;
 let bgIsRecording = false;
 let inMemoryActions = [];
 
-// Khôi phục persistMode khi service worker restart
-chrome.storage.local.get(['persistMode'], (result) => {
+// Khôi phục trạng thái khi service worker restart
+chrome.storage.local.get(['persistMode', 'isRecording'], (result) => {
   persistMode = result.persistMode || false;
+  bgIsRecording = result.isRecording || false;
 });
 
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
@@ -19,18 +20,24 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 
   if (msg.type === 'CLEAR_ACTIONS') {
     inMemoryActions = [];
+    actionQueue = [];
+    queueVersion += 1;
     chrome.storage.local.set({ actions: [] });
   }
 
   if (msg.type === 'START_RECORDING') {
     bgIsRecording = true;
     inMemoryActions = [];
+    actionQueue = [];
+    queueVersion += 1;
     chrome.storage.local.set({ isRecording: true, actions: [] });
     broadcastToActiveTabs({ type: 'START_RECORDING' });
   }
 
   if (msg.type === 'STOP_RECORDING') {
     bgIsRecording = false;
+    actionQueue = [];
+    queueVersion += 1;
     chrome.storage.local.set({ isRecording: false });
     broadcastToActiveTabs({ type: 'STOP_RECORDING' });
   }
@@ -60,6 +67,7 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 // Queue để tránh race condition khi nhiều message đến liên tiếp (storage mode)
 let actionQueue = [];
 let isProcessingQueue = false;
+let queueVersion = 0;
 
 /**
  * So sánh 2 action có trùng nhau không (bỏ qua field count)
@@ -72,6 +80,8 @@ function isSameAction(a, b) {
 }
 
 function addAction(action) {
+  if (!bgIsRecording) return;
+
   if (persistMode) {
     // Storage mode — queue and write
     const last = actionQueue[actionQueue.length - 1];
@@ -93,12 +103,18 @@ function addAction(action) {
 }
 
 function processQueue() {
-  if (actionQueue.length === 0) {
+  if (!bgIsRecording || actionQueue.length === 0) {
     isProcessingQueue = false;
     return;
   }
   isProcessingQueue = true;
+  const currentQueueVersion = queueVersion;
   chrome.storage.local.get(['actions'], (result) => {
+    if (!bgIsRecording || currentQueueVersion !== queueVersion) {
+      isProcessingQueue = false;
+      return;
+    }
+
     const actions = result.actions || [];
 
     // Dedup item đầu queue với item cuối storage
@@ -112,7 +128,13 @@ function processQueue() {
     }
     actionQueue = [];
 
-    chrome.storage.local.set({ actions }, processQueue);
+    chrome.storage.local.set({ actions }, () => {
+      if (currentQueueVersion !== queueVersion) {
+        isProcessingQueue = false;
+        return;
+      }
+      processQueue();
+    });
   });
 }
 
